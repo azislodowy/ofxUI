@@ -1,17 +1,17 @@
 /**********************************************************************************
- 
+
  Copyright (C) 2012 Syed Reza Ali (www.syedrezaali.com)
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy of
  this software and associated documentation files (the "Software"), to deal in
  the Software without restriction, including without limitation the rights to
  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
  of the Software, and to permit persons to whom the Software is furnished to do
  so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +19,7 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
- 
+
  **********************************************************************************/
 
 #ifndef OFXUI_SUPER_CANVAS
@@ -29,27 +29,27 @@
 
 class ofxUISuperCanvas : public ofxUICanvas
 {
-public:    
+public:
     ofxUISuperCanvas(string _label, ofRectangle r, int _size = OFX_UI_FONT_MEDIUM) : ofxUICanvas(r)
     {
         superInit(_label, _size);
     }
-    
+
     ofxUISuperCanvas(string _label, float x, float y, float w, float h, int _size = OFX_UI_FONT_MEDIUM) : ofxUICanvas(x, y, w, h)
     {
-        superInit(_label, _size);        
+        superInit(_label, _size);
     }
-    
+
     ofxUISuperCanvas(string _label, float x, float y, float w, float h, ofxUICanvas *sharedResources, int _size = OFX_UI_FONT_MEDIUM) : ofxUICanvas(x, y, w, h, sharedResources)
     {
         superInit(_label, _size);
     }
-    
+
     ofxUISuperCanvas(string _label, int _size = OFX_UI_FONT_MEDIUM) : ofxUICanvas()
     {
         superInit(_label, _size);
     }
-    
+
     ofxUISuperCanvas(string _label, ofxUICanvas *sharedResources, int _size = OFX_UI_FONT_MEDIUM) : ofxUICanvas(sharedResources)
     {
         superInit(_label, _size);
@@ -59,67 +59,67 @@ public:
     {
         kind = OFX_UI_WIDGET_SUPERCANVAS;
         canvasTitle = new ofxUILabel(rect->getWidth()-widgetSpacing*2, _label, _size);
-        canvasTitle->setEmbedded(true); 
+        canvasTitle->setEmbedded(true);
         headerWidgets.push_back(canvasTitle);
         addWidgetPosition(canvasTitle, widgetPosition, widgetAlign);
         deltaTime = .35;
-        lastHitTime = ofGetElapsedTimef(); 
-        bIsMinified = false;        
+        lastHitTime = ofGetElapsedTimef();
+        bIsMinified = false;
         lastHitTime = 0;
         bTitleLabelHit = false;
         hitPoint = ofPoint(0.0, 0.0);
     }
-    
+
     void setDeltaTime(float _deltaTime)
     {
-        deltaTime = _deltaTime; 
+        deltaTime = _deltaTime;
     }
-    
+
     void setMinified(bool _bIsMinified)
     {
         bIsMinified = _bIsMinified;
         if(bIsMinified)
         {
-            minify(); 
+            minify();
         }
         else
         {
-            maximize(); 
+            maximize();
         }
     }
-    
+
     bool isMinified()
     {
-        return bIsMinified; 
+        return bIsMinified;
     }
-    
+
     void toggleMinified()
     {
         setMinified(!bIsMinified);
     }
-    
+
     ofxUILabel *getCanvasTitle()
     {
         return canvasTitle;
     }
-    
-#ifdef TARGET_OPENGLES
-	
+
+  #if defined(TARGET_OPENGLES) && ! defined(__arm__)
+
     virtual void onTouchDown(ofTouchEventArgs &data)
     {
         if(touchId == -1)
         {
             if(rect->inside(data.x, data.y) && canvasTitle->isHit(data.x, data.y))
             {
-                touchId = data.id; 
+                touchId = data.id;
                 bTitleLabelHit = true;
                 hitPoint.set(data.x - rect->getX(), data.y - rect->getY());
-                return;                
+                return;
             }
         }
 		touchDown(data);
     }
-    
+
     virtual void onTouchMoved(ofTouchEventArgs &data)
     {
         if(touchId == data.id)
@@ -133,17 +133,17 @@ public:
         }
 		touchMoved(data);
     }
-    
+
     virtual void onTouchUp(ofTouchEventArgs &data)
     {
         if(touchId == data.id)
         {
             touchId = -1;
-            bTitleLabelHit = false; 
+            bTitleLabelHit = false;
         }
 		touchUp(data);
     }
-	
+
     virtual void onTouchDoubleTap(ofTouchEventArgs &data)
     {
         if(rect->inside(data.x, data.y) && canvasTitle->isHit(data.x, data.y))
@@ -153,42 +153,42 @@ public:
         }
 		touchDoubleTap(data);
     }
-	
+
 	virtual void onTouchCancelled(ofTouchEventArgs &data)
     {
         if(touchId == data.id)
         {
             touchId = -1;
             bTitleLabelHit = false;
-        }        
+        }
 		touchCancelled(data);
     }
 
 #else
-    
+
     virtual void onMouseReleased(ofMouseEventArgs& data)
     {
-        bTitleLabelHit = false; 
+        bTitleLabelHit = false;
         mouseReleased(data.x, data.y, data.button);
     }
-    
+
     virtual void onMousePressed(ofMouseEventArgs& data)
     {
         if(rect->inside(data.x, data.y) && canvasTitle->isHit(data.x, data.y))
         {
             bTitleLabelHit = true;
             hitPoint.set(data.x - rect->getX(), data.y - rect->getY());
-            
+
             if((ofGetElapsedTimef() - lastHitTime) < deltaTime)
             {
                 toggleMinified();
                 return;
             }
-            lastHitTime = ofGetElapsedTimef(); 
+            lastHitTime = ofGetElapsedTimef();
         }
         mousePressed(data.x, data.y, data.button);
     }
-        
+
     virtual void onMouseDragged(ofMouseEventArgs& data)
     {
         if(bTitleLabelHit)
@@ -199,11 +199,11 @@ public:
         }
         mouseDragged(data.x, data.y, data.button);
     }
-    
+
 #endif
-    
+
 #ifndef OFX_UI_NO_XML
-    
+
     virtual void saveSettings(string fileName)
     {
         ofxXmlSettings *XML = new ofxXmlSettings();
@@ -214,7 +214,7 @@ public:
         XML->setValue("IsMinified", (bIsMinified ? 1 : 0), 0);
         XML->setValue("XPosition", rect->getX(), 0);
         XML->setValue("YPosition", rect->getY(), 0);
-        XML->popTag();        
+        XML->popTag();
         for(int i = 0; i < widgetsWithState.size(); i++)
         {
             int index = XML->addTag("Widget");
@@ -229,11 +229,11 @@ public:
         XML->saveFile(fileName);
         delete XML;
     }
-    
+
     virtual void loadSettings(string fileName)
     {
         ofxXmlSettings *XML = new ofxXmlSettings();
-        XML->loadFile(fileName);                
+        XML->loadFile(fileName);
         int widgetTags = XML->getNumTags("Widget");
         for(int i = 0; i < widgetTags; i++)
         {
@@ -252,20 +252,20 @@ public:
         setMinified((value ? 1 : 0));
         rect->setX(XML->getValue("XPosition", rect->getX(), 0));
         rect->setY(XML->getValue("YPosition", rect->getY(), 0));
-        XML->popTag();        
+        XML->popTag();
         hasKeyBoard = false;
         delete XML;
     }
-    
+
 #endif
 
     //These header widgets are meant to stay visible when minified...
     void addWidgetToHeader(ofxUIWidget *widget)
     {
-        widget->setEmbedded(true); 
-        headerWidgets.push_back(widget); 
+        widget->setEmbedded(true);
+        headerWidgets.push_back(widget);
     }
-    
+
 protected:
     void minify()
     {
@@ -284,10 +284,10 @@ protected:
             {
                 w->setVisible(true);
             }
-		}        
+		}
         autoSizeToFitWidgets();
     }
-    
+
     void maximize()
     {
         for(vector<ofxUIWidget *>::iterator it = widgets.begin(); it != widgets.end(); ++it)
@@ -300,11 +300,11 @@ protected:
 		}
         autoSizeToFitWidgets();
     }
-    
+
     ofxUILabel *canvasTitle;
     vector<ofxUIWidget *> headerWidgets;
-    
-    ofPoint hitPoint; 
+
+    ofPoint hitPoint;
     float deltaTime;
     float lastHitTime;
     bool bIsMinified;
